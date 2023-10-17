@@ -38,7 +38,7 @@ jobs:
 
       - name: Tag and Push
         run: |
-          tag=$(echo "refs/tags/v0.0.2" | cut -c12-)
+          tag=$(echo "${{ github.ref }}" | cut -c12-)
           
           docker tag \
             "ghcr.io/jsirianni/pgbouncer_exporter:latest" \
