@@ -1,11 +1,12 @@
-ARG ARCH="amd64"
-ARG OS="linux"
-FROM quay.io/prometheus/busybox-${OS}-${ARCH}:latest
-LABEL maintainer="The Prometheus Authors <prometheus-developers@googlegroups.com>"
+FROM golang:1.21-alpine as builder
+WORKDIR /app
+COPY . .
+RUN CGO_ENABLED=0 go build -o /pgbouncer_exporter
 
-ARG ARCH="amd64"
-ARG OS="linux"
-COPY .build/${OS}-${ARCH}/pgbouncer_exporter /bin/pgbouncer_exporter
+FROM busybox:latest
+LABEL maintainer="Joe Sirianni <joe@observiq.com>"
+
+COPY --from=builder /pgbouncer_exporter /bin/pgbouncer_exporter
 COPY LICENSE                                /LICENSE
 
 USER       nobody

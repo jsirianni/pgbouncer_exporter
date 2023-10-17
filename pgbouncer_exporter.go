@@ -59,6 +59,16 @@ func main() {
 	logger := promlog.New(promlogConfig)
 
 	connectionString := *connectionStringPointer
+
+	if connectionString == "" {
+		connectionString = os.Getenv("PGBOUNCER_CONNECTION_STRING")
+	}
+
+	if connectionString == "" {
+		level.Error(logger).Log("msg", "No connection string provided")
+		os.Exit(1)
+	}
+
 	exporter := NewExporter(connectionString, namespace, logger)
 	prometheus.MustRegister(exporter)
 	prometheus.MustRegister(version.NewCollector("pgbouncer_exporter"))
