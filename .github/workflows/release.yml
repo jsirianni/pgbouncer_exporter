@@ -36,15 +36,15 @@ jobs:
       - name: Build
         run: docker build . -t ghcr.io/jsirianni/pgbouncer_exporter:latest
 
-      - name: Tag
+      - name: Tag and Push
         run: |
+          tag=$(echo "refs/tags/v0.0.2" | cut -c12-)
+          
           docker tag \
             "ghcr.io/jsirianni/pgbouncer_exporter:latest" \
-            "ghcr.io/jsirianni/pgbouncer_exporter:${{ github.ref }}"
-      
-      - name: Push
-        run: |
+            "ghcr.io/jsirianni/pgbouncer_exporter:${tag}"
+          
           docker push \
             "ghcr.io/jsirianni/pgbouncer_exporter:latest"
           docker push \
-            "ghcr.io/jsirianni/pgbouncer_exporter:${{ github.ref }}"
+            "ghcr.io/jsirianni/pgbouncer_exporter:${tag}"
