@@ -30,7 +30,6 @@ import (
 )
 
 const namespace = "pgbouncer"
-const DefaultConnectionString = "postgres://postgres:@localhost:6543/pgbouncer?sslmode=disable"
 
 func main() {
 	const pidFileHelpText = `Path to PgBouncer pid file.
@@ -46,7 +45,7 @@ func main() {
 	flag.AddFlags(kingpin.CommandLine, promlogConfig)
 
 	var (
-		connectionStringPointer = kingpin.Flag("pgBouncer.connectionString", "Connection string for accessing pgBouncer.").Default("").String()
+		connectionStringPointer = kingpin.Flag("pgBouncer.connectionString", "Connection string for accessing pgBouncer.").Default("postgres://postgres:@localhost:6543/pgbouncer?sslmode=disable").String()
 		metricsPath             = kingpin.Flag("web.telemetry-path", "Path under which to expose metrics.").Default("/metrics").String()
 		pidFilePath             = kingpin.Flag("pgBouncer.pid-file", pidFileHelpText).Default("").String()
 	)
@@ -60,15 +59,6 @@ func main() {
 	logger := promlog.New(promlogConfig)
 
 	connectionString := *connectionStringPointer
-
-	if connectionString == "" {
-		connectionString = os.Getenv("PGBOUNCER_CONNECTION_STRING")
-	}
-
-	if connectionString == "" {
-		level.Info(logger).Log("msg", "No connection string provided")
-		connectionString = DefaultConnectionString
-	}
 
 	// TEMP
 	level.Info(logger).Log("msg", "connectionString", connectionString)
