@@ -30,6 +30,7 @@ import (
 )
 
 const namespace = "pgbouncer"
+const DefaultConnectionString = "postgres://postgres:@localhost:6543/pgbouncer?sslmode=disable"
 
 func main() {
 	const pidFileHelpText = `Path to PgBouncer pid file.
@@ -45,7 +46,7 @@ func main() {
 	flag.AddFlags(kingpin.CommandLine, promlogConfig)
 
 	var (
-		connectionStringPointer = kingpin.Flag("pgBouncer.connectionString", "Connection string for accessing pgBouncer.").Default("postgres://postgres:@localhost:6543/pgbouncer?sslmode=disable").String()
+		connectionStringPointer = kingpin.Flag("pgBouncer.connectionString", "Connection string for accessing pgBouncer.").Default("").String()
 		metricsPath             = kingpin.Flag("web.telemetry-path", "Path under which to expose metrics.").Default("/metrics").String()
 		pidFilePath             = kingpin.Flag("pgBouncer.pid-file", pidFileHelpText).Default("").String()
 	)
@@ -65,8 +66,8 @@ func main() {
 	}
 
 	if connectionString == "" {
-		level.Error(logger).Log("msg", "No connection string provided")
-		os.Exit(1)
+		level.Info(logger).Log("msg", "No connection string provided")
+		connectionString = DefaultConnectionString
 	}
 
 	exporter := NewExporter(connectionString, namespace, logger)
