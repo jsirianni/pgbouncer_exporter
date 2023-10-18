@@ -45,9 +45,14 @@ func main() {
 	flag.AddFlags(kingpin.CommandLine, promlogConfig)
 
 	var (
-		connectionStringPointer = kingpin.Flag("pgBouncer.connectionString", "Connection string for accessing pgBouncer.").Default("postgres://postgres:@localhost:6543/pgbouncer?sslmode=disable").String()
-		metricsPath             = kingpin.Flag("web.telemetry-path", "Path under which to expose metrics.").Default("/metrics").String()
-		pidFilePath             = kingpin.Flag("pgBouncer.pid-file", pidFileHelpText).Default("").String()
+		hostname    = kingpin.Flag("pgBouncer.hostname", "Hostname for accessing pgBouncer.").Default("localhost").String()
+		port        = kingpin.Flag("pgBouncer.port", "Port for accessing pgBouncer.").Default("6543").Int()
+		database    = kingpin.Flag("pgBouncer.database", "Database for accessing pgBouncer.").Default("pgbouncer").String()
+		username    = kingpin.Flag("pgBouncer.username", "Username for accessing pgBouncer.").Default("pgbouncer").String()
+		password    = kingpin.Flag("pgBouncer.password", "Password for accessing pgBouncer.").Default("").String()
+		sslmode     = kingpin.Flag("pgBouncer.sslmode", "SSL mode for accessing pgBouncer.").Default("disable").String()
+		metricsPath = kingpin.Flag("web.telemetry-path", "Path under which to expose metrics.").Default("/metrics").String()
+		pidFilePath = kingpin.Flag("pgBouncer.pid-file", pidFileHelpText).Default("").String()
 	)
 
 	toolkitFlags := kingpinflag.AddFlags(kingpin.CommandLine, ":9127")
@@ -58,7 +63,21 @@ func main() {
 
 	logger := promlog.New(promlogConfig)
 
-	connectionString := *connectionStringPointer
+	connection := Connection{
+		Hostname: *hostname,
+		Port:     *port,
+		Database: *database,
+		Username: *username,
+		Password: *password,
+		SSLMode:  *sslmode,
+	}
+
+	connectionString, err := connection.Build()
+	if err != nil {
+		level.Error(logger).Log("err", err)
+		os.Exit(1)
+	}
+
 	exporter := NewExporter(connectionString, namespace, logger)
 	prometheus.MustRegister(exporter)
 	prometheus.MustRegister(version.NewCollector("pgbouncer_exporter"))
