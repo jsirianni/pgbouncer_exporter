@@ -14,6 +14,7 @@
 package main
 
 import (
+	"fmt"
 	"net/http"
 	"os"
 
@@ -61,7 +62,7 @@ func main() {
 	connectionString := *connectionStringPointer
 
 	// TEMP
-	level.Info(logger).Log("msg", "connectionString", connectionString)
+	fmt.Println(connectionString)
 
 	exporter := NewExporter(connectionString, namespace, logger)
 	prometheus.MustRegister(exporter)
