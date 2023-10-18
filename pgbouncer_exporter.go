@@ -70,6 +70,9 @@ func main() {
 		connectionString = DefaultConnectionString
 	}
 
+	// TEMP
+	level.Info(logger).Log("msg", "connectionString", connectionString)
+
 	exporter := NewExporter(connectionString, namespace, logger)
 	prometheus.MustRegister(exporter)
 	prometheus.MustRegister(version.NewCollector("pgbouncer_exporter"))
